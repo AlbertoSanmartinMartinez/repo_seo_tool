@@ -1,0 +1,68 @@
+
+{% load static %}
+{% load storage_tags %}
+
+<div class="modal-dialog modal-lg">
+  <div class="modal-content">
+
+      <div class="modal-header">
+        <h4 class="modal-title">{{ title }}</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+
+        {% for key, value in element.fields_values.items %}
+          <p><b>{{ key }}:</b> {{ value }}</p>
+        {% endfor %}
+
+        <!-- If Room Detail -->
+        {% if model.meta.verbose_name == 'Sala' %}
+          <p><b>Mapa de Sala:</b></p>
+          <div class="container-fluid">
+            {% setValue 0 as aux %}
+            {% for item in room_map %}
+              {% if item.y == 0 %}
+                {% if item.x != aux %}
+                  </div>
+                {% endif %}
+                <div class="row" style="height: 20%;">
+              {% endif %}
+              {% if item.status == 'Disponible' %}
+                <div class="col sala empty" onclick="return openCustomModal('{% url 'panel:container_view' item.id %}')">
+              {% else %}
+                <div class="col sala full" onclick="return openCustomModal('{% url 'panel:container_view' item.id %}')">
+              {% endif %}
+              <p>{{ item.id }}</p>
+              </div>
+              {% setValue item.x as aux %}
+            {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+
+        </div>
+
+        <!-- If Room Detail -->
+        {% if model.meta.verbose_name == 'Sala' %}
+          <div class="modal-footer">
+
+            {% get_url urls 'update' as element_update %}
+            {% check_permission user.username type="Atributo" action="Modificar" model=model object=element.id as aux %}
+            {% if aux or user.is_superuser %}
+            <button type="submit" onclick="return openCustomModal('{% url element_update element.id %}')" class="btn btn-outline-primary">Editar</button>
+            {% endif %}
+
+            <!--{% if element.status == 'Cerrada' %}
+              <button type="submit" class="btn btn-outline-primary">Abrir</button>
+            {% else %}
+              <button type="submit" class="btn btn-outline-danger">Cerrar</button>
+            {% endif %}-->
+
+          </div>
+        {% endif %}
+
+      </div>
+  </div>
+</div>
